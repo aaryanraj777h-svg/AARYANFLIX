@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#000000">
+<title>AryanFlix</title>
+<style>
+:root{--red:#e50914;--card:#1c1c1e;--mut:#9b9b9f}
+*{box-sizing:border-box;margin:0;font-family:'Helvetica Neue',Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:#000;color:#fff;min-height:100vh;padding-bottom:76px}
+.wm,.logo{font:900 34px Impact,'Arial Narrow',sans-serif;color:var(--red)}
+.logo{display:inline-block;transform:scaleX(.85);transform-origin:left}.wm{letter-spacing:3px;font-size:38px}
+.top{position:sticky;top:0;z-index:6;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:linear-gradient(#000,#000a 75%,#0000)}
+.top div{display:flex;gap:18px;align-items:center}
+.av{width:28px;height:28px;border-radius:5px;background:#2a86ff;display:grid;place-items:center;font-weight:700;font-size:14px}
+svg{width:24px;height:24px;fill:currentColor}
+.hero{position:relative;aspect-ratio:3/4;max-height:66vh;margin:0 14px 8px;border-radius:10px;overflow:hidden;background:linear-gradient(160deg,#5a0a10,#120305)}
+.hero img,.p img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hg{position:absolute;inset:auto 0 0;padding:60px 14px 14px;background:linear-gradient(#0000,#000e);z-index:2;text-align:center}
+.hg h1{font-size:26px;margin-bottom:12px}.hb{display:flex;gap:10px}.hb button{flex:1}
+h3{font-size:17px;padding:14px 14px 8px}
+.row{display:flex;gap:8px;overflow-x:auto;padding:0 14px;scrollbar-width:none}.row::-webkit-scrollbar{display:none}
+.c{flex:0 0 108px;cursor:pointer}
+.p{position:relative;aspect-ratio:2/3;border-radius:6px;overflow:hidden;background:linear-gradient(160deg,#3a0d12,#16090b);display:grid;place-items:center}
+.ti{padding:8px;font:700 13px Georgia,serif;text-align:center;color:#fffb}
+.n{position:absolute;top:4px;left:6px;z-index:2;color:var(--red);font:900 18px Impact,sans-serif;text-shadow:0 0 4px #000}
+.tag{position:absolute;bottom:0;left:0;right:0;z-index:2;background:var(--red);font:700 11px Arial;text-align:center;padding:3px;font-style:normal}.tag.f{background:#1f8f45}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 14px}
+input{padding:13px;border-radius:6px;border:0;background:#333;color:#fff;font-size:16px;width:100%}
+#q{margin:4px 14px 12px;width:calc(100% - 28px)}
+button{padding:12px;border:0;border-radius:6px;font-weight:700;font-size:15px;cursor:pointer;background:#333;color:#fff}
+button.w{background:#fff;color:#000}
+button.wa{background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#121212;border-top:1px solid #222;z-index:10;padding:8px 0 10px}
+nav a{flex:1;display:grid;justify-items:center;gap:3px;font-size:11px;color:var(--mut);cursor:pointer}nav a.on{color:#fff}
+.login{max-width:340px;margin:20vh auto;padding:0 20px;display:grid;gap:14px;text-align:center}.login p{color:var(--mut);font-size:14px}
+.empty{text-align:center;color:var(--mut);padding:50px 14px;grid-column:1/-1}
+.note{background:var(--card);padding:12px;border-radius:8px;font-size:14px;color:#cfcfd4;margin:0 14px 8px;line-height:1.5}
+.li{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid #222;cursor:pointer;gap:10px}.li small{color:var(--mut)}
+#m{display:none;position:fixed;inset:0;background:#000;z-index:20;overflow:auto}#m.on{display:block}
+.box{max-width:560px;margin:0 auto;padding:14px;display:grid;gap:12px;align-content:start}.box .note{margin:0}
+.x{justify-self:end;font-size:24px;cursor:pointer;color:var(--mut)}
+#stage{aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;display:grid;place-items:center}
+#stage video,#stage img{width:100%;height:100%;object-fit:cover}
+.ul{color:#fff;margin-right:14px;text-decoration:underline;cursor:pointer}
+#t{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:12px 18px;border-radius:8px;font-weight:700;z-index:50;display:none;max-width:90%}
+</style>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head><body>
+<div id="app"></div><div id="m"></div><div id="t"></div>
+<script>
+const APP="AryanFlix";
+const UPI="9693476343@fam";
+const ADMIN_PHONE="919693476343"; // WhatsApp Number
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyAbcbDIR3UVq2lXAX8coEISIvZpmTRgjO8",
+  authDomain: "aaryan-flix.firebaseapp.com",
+  projectId: "aaryan-flix",
+  storageBucket: "aaryan-flix.firebasestorage.app",
+  messagingSenderId: "545685450044",
+  appId: "1:545685450044:web:301eb2c6427bd97e2b4239",
+  measurementId: "G-C8DTXQKEHN"
+};
+if(!firebase.apps.length){firebase.initializeApp(firebaseConfig);}
+const db = firebase.firestore();
+
+let D={videos:{},requests:{},payments:{},settings:{},users:{}},lastInfo='';
+
+async function put(path,val){
+  try{
+    const parts = path.split('/');
+    const coll = parts[0];
+    if(parts.length===2){
+      const docId = parts[1];
+      if(val===null){
+        await db.collection(coll).doc(docId).delete();
+      }else{
+        await db.collection(coll).doc(docId).set(val,{merge:true});
+      }
+    }else if(parts.length===3){
+      const docId = parts[1];
+      const field = parts[2];
+      await db.collection(coll).doc(docId).set({[field]:val},{merge:true});
+    }
+  }catch(e){
+    console.error("Firestore put error:",e);
+  }
+}
+
+function listenFirebase(){
+  const colls = ['videos','requests','payments','settings','users'];
+  colls.forEach(c=>{
+    db.collection(c).onSnapshot(s=>{
+      D[c] = D[c] || {};
+      s.docChanges().forEach(ch=>{
+        if(ch.type === 'removed') delete D[c][ch.doc.id];
+        else D[c][ch.doc.id] = ch.doc.data();
+      });
+      if(me&&$('#main')) render();
+    },err=>console.log(err));
+  });
+}
+
+const idb=()=>new Promise((ok,no)=>{const r=indexedDB.open('aryanflix_files',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+const fx=async(m,k,v)=>{const d=await idb(),t=d.transaction('f',m=='get'?'readonly':'readwrite'),s=t.objectStore('f'),q=m=='get'?s.get(k):m=='put'?s.put(v,k):s.delete(k);return new Promise((ok,no)=>{t.oncomplete=()=>ok(q.result);t.onerror=t.onabort=()=>no(t.error)})};
+
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const day=()=>new Date().toLocaleDateString('en-CA');
+let me=localStorage.getItem('af_me'),cur=null,tab='h',last='',payOn=false;
+const U=()=>(D.users||{})[me]||{},upd=p=>put('users/'+me,{...U(),...p});
+const allFree=()=>(D.settings||{}).allFree===true;
+const vids=()=>Object.values(D.videos||{}).sort((a,b)=>b.ts-a.ts);
+const req=id=>(D.requests||{})[me+'_'+id],pay=id=>(D.payments||{})[me+'_'+id];
+const dlLeft=()=>3-(U().dlDay===day()?U().dlCount||0:0);
+function toast(m,ms=2800){const t=$('#t');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',ms)}
+const IC={h:'<path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/>',s:'<circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2.4"/>',d:'<path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16" fill="none" stroke="currentColor" stroke-width="2.4"/>',p:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.6-7 8-7s8 2.5 8 7z"/>'};
+const svg=k=>`<svg viewBox="0 0 24 24">${IC[k]}</svg>`;
+
+function access(v){
+ if(allFree())return'play';
+ const p=pay(v.id),t=day();
+ if(p&&p.status==='approved')return'play';
+ if(U().lastFreeDay===t&&U().lastFreeVid===v.id)return'play';
+ if(p&&p.status==='pending')return'payPending';
+ if(U().lastFreeDay===t)return'limit';
+ if(v.price==0)return'play';
+ const r=req(v.id);
+ if(r&&r.status==='approved'&&!r.used)return'play';
+ return r&&r.status!=='approved'?r.status:'locked';
+}
+
+function login(){$('#app').innerHTML=`<div class=login><div class=wm>${APP.toUpperCase()}</div><p>Enter your mobile number to start watching</p><input id=ph type=tel maxlength=10 placeholder="10-digit mobile number"><button class=w onclick=enter()>Continue</button></div>`}
+async function enter(){const p=$('#ph').value.trim();if(!/^[6-9]\d{9}$/.test(p))return toast('Enter a valid 10-digit number');
+ me=p;localStorage.setItem('af_me',me);if(!U().joined)await upd({joined:Date.now()});shell()}
+function out(){localStorage.removeItem('af_me');me=null;cur=null;login()}
+
+function shell(){tab='h';$('#app').innerHTML=`<div class=top><span class=logo>${APP[0]}</span><div><span onclick="go('s')">${svg('s')}</span><span class=av onclick="go('p')">${me[0]}</span></div></div><div id=main></div><nav>${[['h','Home'],['s','Search'],['d','Downloads'],['p','Profile']].map(([k,l])=>`<a data-t=${k} onclick="go('${k}')">${svg(k)}${l}</a>`).join('')}</nav>`;render(1)}
+function go(t){tab=t;render(1);scrollTo(0,0)}
+
+const img=v=>v.poster?`<img src="${esc(v.poster)}" onerror="this.remove()">`:'';
+const card=v=>`<div class=c onclick="openV('${v.id}')"><div class=p><b class=n>${APP[0]}</b><span class=ti>${esc(v.title)}</span>${img(v)}<i class="tag${v.price>0?'':' f'}">${v.price>0?'₹'+v.price:'FREE'}</i></div></div>`;
+function rows(){const L=vids();if(!L.length)return'<div class=empty>No videos yet.<br>Add videos from the admin app.</div>';
+ const R=[['New on '+APP,L],['Free videos',L.filter(v=>!(v.price>0))]];
+ [...new Set(L.map(v=>v.cat).filter(Boolean))].forEach(c=>R.push([c,L.filter(v=>v.cat==c)]));
+ const h=L[0];
+ return`<div class=hero>${img(h)}<div class=hg><h1>${esc(h.title)}</h1><div class=hb><button class=w onclick="openV('${h.id}')">▶ Play</button><button onclick="openV('${h.id}')">ⓘ Info</button></div></div></div>`
+ +R.filter(r=>r[1].length).map(([t,l])=>`<h3>${esc(t)}</h3><div class=row>${l.slice(0,15).map(card).join('')}</div>`).join('')}
+function find(){const q=($('#q').value||'').toLowerCase();$('#sr').innerHTML=vids().filter(v=>v.title.toLowerCase().includes(q)).map(card).join('')||'<div class=empty>Nothing found</div>'}
+function dls(){const l=Object.values(U().dls||{}).reverse();return`<h3>Downloads</h3><div class=note>Downloads left today: ${dlLeft()}/3</div>`+(l.map(x=>`<div class=li onclick="openV('${x.id}')"><b>${esc(x.title)}</b><small>${new Date(x.ts).toLocaleDateString()}</small></div>`).join('')||'<div class=empty>No downloads yet.</div>')}
+function prof(){return`<h3>Profile</h3><div class=li><b>+91 ${esc(me)}</b><small>Mobile number</small></div><div class=li><b>${allFree()?'The app is FREE right now':'Free watch: '+(U().lastFreeDay===day()?'used today':'available')}</b><small>Downloads left: ${dlLeft()}/3</small></div><div style="padding:14px"><button style="width:100%" onclick=out()>Log out</button></div>`}
+function render(f){const s=JSON.stringify(D)+tab;if(!f&&s==last)return;last=s;
+ document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.t==tab));
+ const m=$('#main');
+ if(tab=='h')m.innerHTML=rows();
+ else if(tab=='s'){if(!$('#q'))m.innerHTML='<input id=q placeholder="Search movies" oninput=find()><div id=sr class=grid></div>';find()}
+ else m.innerHTML=tab=='d'?dls():prof();
+ const a=document.activeElement;if(cur&&!$('#pl')&&!(a&&a.closest&&a.closest('#m')))openV(cur)}
+
+function payPanel(v){const u=((D.settings||{}).upi&&D.settings.upi.val)||((D.settings||{}).upi)||UPI,link=`upi://pay?pa=${u}&pn=${encodeURIComponent(APP)}&am=${v.price}&cu=INR&tn=${encodeURIComponent(v.title.slice(0,30))}`;
+ return`<div class=note><b>Pay ₹${v.price} to ${esc(u)}</b><br><a class=ul href="${link}">Open UPI app</a><a class=ul onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(u)}');toast('UPI ID copied')">Copy UPI ID</a><br><br>After paying, enter transaction ID below.<input id=utr placeholder="Transaction / UTR ID" style="margin-top:10px"><button class=w style="width:100%;margin-top:8px" onclick=sendPay()>Submit payment</button></div>`}
+const payUI=v=>v.price>0?(payOn?payPanel(v):`<button onclick="payOn=true;openV(cur)">Pay ₹${v.price}</button>`):'';
+
+function openV(id){cur=id;const v=D.videos&&D.videos[id];if(!v)return closeV();const a=access(v),pr=pay(id);let acts;
+ const waMsg=encodeURIComponent(`Hello Admin, I want to watch "${v.title}" on AryanFlix for free. My registered number is: +91 ${me}`);
+ const waBtn=`<a class="w wa" style="margin-top:8px" href="https://wa.me/${ADMIN_PHONE}?text=${waMsg}" target="_blank">💬 Chat on WhatsApp for Free Access</a>`;
+
+ if(a=='play')acts=`<button class=w onclick=play()>▶ Play</button><button onclick=dl()>⬇ Download (${dlLeft()} left today)</button>`;
+ else if(a=='payPending')acts='<div class=note>Payment submitted. Admin is verifying.</div>';
+ else if(a=='limit')acts='<div class=note>Today\'s free watch is used. Pay or talk to admin.</div>'+payUI(v)+waBtn;
+ else if(a=='pending')acts='<div class=note>Free request sent. Admin approval pending.</div>'+waBtn+payUI(v);
+ else acts=(pr&&pr.status=='rejected'?'<div class=note>Payment was rejected.</div>':'')+(a=='rejected'?'<div class=note>Request was declined.</div>':'<button class=w onclick=ask()>Request free access</button>')+waBtn+payUI(v);
+
+ $('#m').innerHTML=`<div class=box><a class=x onclick=closeV()>✕</a><div id=stage>${img(v)}</div><h2>${esc(v.title)}</h2><small style="color:var(--mut)">${v.price>0?'₹'+v.price:'FREE'}${v.cat?' · '+esc(v.cat):''}</small><p style="color:var(--mut);font-size:14px">${esc(v.desc||'')}</p>${acts}</div>`;$('#m').classList.add('on')}
+function closeV(){$('#m').classList.remove('on');$('#m').innerHTML='';cur=null;payOn=false}
+
+async function ask(){const v=D.videos[cur],id=me+'_'+cur;await put('requests/'+id,{id,phone:me,vid:cur,title:v.title,status:'pending',ts:Date.now()});toast('Request sent to admin');openV(cur)}
+async function sendPay(){const v=D.videos[cur],u=$('#utr').value.trim();if(!/^[A-Za-z0-9]{8,22}$/.test(u))return toast('Enter a valid transaction ID');
+ const id=me+'_'+cur;await put('payments/'+id,{id,phone:me,vid:cur,title:v.title,amount:v.price,utr:u,status:'pending',ts:Date.now()});payOn=false;toast('Payment submitted for verification');openV(cur)}
+const VC={};
+async function src(v){lastInfo='';
+ if(v.chunked){if(VC[v.id])return VC[v.id];
+  try{const parts=new Array(v.n);let done=0;
+   for(let s=0;s<v.n;s+=6){await Promise.all([...Array(Math.min(6,v.n-s)).keys()].map(async k=>{const i=s+k,d=await db.collection('chunks').doc(v.id+'_'+i).get();if(!d.exists)throw new Error('part '+i+' missing');parts[i]=d.data().d.toUint8Array();done++;const st=$('#stage');if(st)st.innerHTML='<span style="color:#9b9b9f">Loading video '+Math.round(done/v.n*100)+'%</span>'}))}
+   VC[v.id]=URL.createObjectURL(new Blob(parts,{type:v.mime||'video/mp4'}));return VC[v.id]}
+  catch(e){lastInfo='ERR';toast('Could not load video: '+(e.message||'error'),6000);return''}}
+ if(!v.local)return v.url;toast('This video was saved on the admin phone only. Ask admin to delete and add it again.',6000);const b=await fx('get',v.id);if(!b||!b.size)return'';lastInfo=(b.size/1048576).toFixed(1)+' MB, '+(b.type||'no type');return URL.createObjectURL(new Blob([b],{type:v.mime||b.type||'video/mp4'}))}
+function watch(e){const st=m=>{let n=$('#vs');if(!n){$('#stage').insertAdjacentHTML('afterend','<div id=vs class=note></div>');n=$('#vs')}n.textContent=m};
+ st('Loading video...');
+ e.onloadedmetadata=()=>st(e.videoWidth?'Ready: '+e.videoWidth+'x'+e.videoHeight:'Video ready');
+ e.onplaying=()=>{const n=$('#vs');if(n)n.remove()};}
+
+async function play(){const v=D.videos[cur],s=await src(v);if(!s)return lastInfo=='ERR'||toast('Video link is missing.',5000);
+ const p=pay(cur);
+ if(!allFree()&&!(p&&p.status==='approved')){await upd({lastFreeDay:day(),lastFreeVid:cur});const r=req(cur);if(r&&r.status==='approved')await put('requests/'+r.id+'/used',true)}
+ $('#stage').innerHTML=`<video id=pl src="${esc(s)}" controls playsinline preload="auto"></video>`;watch($('#pl'));$('#pl').play().catch(()=>0)}
+
+async function dl(){if(dlLeft()<=0)return toast('Limit reached (3 downloads per day)');const v=D.videos[cur],s=await src(v);if(!s)return lastInfo=='ERR'||toast('Video link is missing.',5000);
+ const a=document.createElement('a');a.href=s;a.download=v.title+'.mp4';a.target='_blank';a.click();
+ await upd({dlDay:day(),dlCount:4-dlLeft(),dls:[...Object.values(U().dls||{}),{id:cur,title:v.title,ts:Date.now()}].slice(-20)});openV(cur)}
+
+(async()=>{
+  listenFirebase();
+  me?shell():login();
+})();
+</script></body></html>
