@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#000000">
+<title>AryanFlix</title>
+<style>
+:root{--red:#e50914;--card:#1c1c1e;--mut:#9b9b9f}
+*{box-sizing:border-box;margin:0;font-family:'Helvetica Neue',Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:#000;color:#fff;min-height:100vh;padding-bottom:76px}
+.wm,.logo{font:900 34px Impact,'Arial Narrow',sans-serif;color:var(--red)}
+.logo{display:inline-block;transform:scaleX(.85);transform-origin:left}.wm{letter-spacing:3px;font-size:38px}
+.top{position:sticky;top:0;z-index:6;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:linear-gradient(#000,#000a 75%,#0000)}
+.top div{display:flex;gap:18px;align-items:center}
+.av{width:28px;height:28px;border-radius:5px;background:#2a86ff;display:grid;place-items:center;font-weight:700;font-size:14px}
+svg{width:24px;height:24px;fill:currentColor}
+.hero{position:relative;aspect-ratio:3/4;max-height:66vh;margin:0 14px 8px;border-radius:10px;overflow:hidden;background:linear-gradient(160deg,#5a0a10,#120305)}
+.hero img,.p img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hg{position:absolute;inset:auto 0 0;padding:60px 14px 14px;background:linear-gradient(#0000,#000e);z-index:2;text-align:center}
+.hg h1{font-size:26px;margin-bottom:12px}.hb{display:flex;gap:10px}.hb button{flex:1}
+h3{font-size:17px;padding:14px 14px 8px}
+.row{display:flex;gap:8px;overflow-x:auto;padding:0 14px;scrollbar-width:none}.row::-webkit-scrollbar{display:none}
+.c{flex:0 0 108px;cursor:pointer}
+.p{position:relative;aspect-ratio:2/3;border-radius:6px;overflow:hidden;background:linear-gradient(160deg,#3a0d12,#16090b);display:grid;place-items:center}
+.ti{padding:8px;font:700 13px Georgia,serif;text-align:center;color:#fffb}
+.n{position:absolute;top:4px;left:6px;z-index:2;color:var(--red);font:900 18px Impact,sans-serif;text-shadow:0 0 4px #000}
+.tag{position:absolute;bottom:0;left:0;right:0;z-index:2;background:var(--red);font:700 11px Arial;text-align:center;padding:3px;font-style:normal}.tag.f{background:#1f8f45}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 14px}
+input{padding:13px;border-radius:6px;border:0;background:#333;color:#fff;font-size:16px;width:100%}
+#q{margin:4px 14px 12px;width:calc(100% - 28px)}
+button{padding:12px;border:0;border-radius:6px;font-weight:700;font-size:15px;cursor:pointer;background:#333;color:#fff}
+button.w{background:#fff;color:#000}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#121212;border-top:1px solid #222;z-index:10;padding:8px 0 10px}
+nav a{flex:1;display:grid;justify-items:center;gap:3px;font-size:11px;color:var(--mut);cursor:pointer}nav a.on{color:#fff}
+.login{max-width:340px;margin:20vh auto;padding:0 20px;display:grid;gap:14px;text-align:center}.login p{color:var(--mut);font-size:14px}
+.empty{text-align:center;color:var(--mut);padding:50px 14px;grid-column:1/-1}
+.note{background:var(--card);padding:12px;border-radius:8px;font-size:14px;color:#cfcfd4;margin:0 14px 8px;line-height:1.5}
+.li{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid #222;cursor:pointer;gap:10px}.li small{color:var(--mut)}
+#m{display:none;position:fixed;inset:0;background:#000;z-index:20;overflow:auto}#m.on{display:block}
+.box{max-width:560px;margin:0 auto;padding:14px;display:grid;gap:12px;align-content:start}.box .note{margin:0}
+.x{justify-self:end;font-size:24px;cursor:pointer;color:var(--mut)}
+#stage{aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;display:grid;place-items:center}
+#stage video,#stage img{width:100%;height:100%;object-fit:cover}
+.ul{color:#fff;margin-right:14px;text-decoration:underline;cursor:pointer}
+#t{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:12px 18px;border-radius:8px;font-weight:700;z-index:50;display:none;max-width:90%}
+</style></head><body>
+<div id="app"></div><div id="m"></div><div id="t"></div>
+<script>
+/* ===== SETTINGS ===== */
+const APP="AryanFlix";
+const UPI="9693476343@fam";   // default UPI ID (admin app Settings can change it)
+const DB_URL="";              // empty = same browser only. For multi-device, paste a Firebase Realtime DB URL
+const K="aryanflix_db";
+/* ===== SHARED DB + FILE STORE (same code in the admin app) ===== */
+let D={},lastInfo='';
+const loc=()=>JSON.parse(localStorage.getItem(K)||'{}');
+async function load(){if(DB_URL){try{return(await(await fetch(DB_URL+'/ott.json')).json())||{}}catch(e){return D}}return loc()}
+async function put(path,val){
+ if(DB_URL){await fetch(DB_URL+'/ott/'+path+'.json',{method:val==null?'DELETE':'PUT',body:JSON.stringify(val)})}
+ else{const d=loc(),p=path.split('/');let o=d;p.slice(0,-1).forEach(k=>o=o[k]=o[k]||{});val==null?delete o[p.at(-1)]:o[p.at(-1)]=val;localStorage.setItem(K,JSON.stringify(d))}
+ D=await load()}
+const idb=()=>new Promise((ok,no)=>{const r=indexedDB.open('aryanflix_files',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+const fx=async(m,k,v)=>{const d=await idb(),t=d.transaction('f',m=='get'?'readonly':'readwrite'),s=t.objectStore('f'),q=m=='get'?s.get(k):m=='put'?s.put(v,k):s.delete(k);return new Promise((ok,no)=>{t.oncomplete=()=>ok(q.result);t.onerror=t.onabort=()=>no(t.error)})};
+/* ===== HELPERS ===== */
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const day=()=>new Date().toLocaleDateString('en-CA');
+let me=localStorage.getItem('af_me'),cur=null,tab='h',last='',payOn=false;
+const U=()=>(D.users||{})[me]||{},upd=p=>put('users/'+me,{...U(),...p});
+const allFree=()=>(D.settings||{}).allFree===true;
+const vids=()=>Object.values(D.videos||{}).sort((a,b)=>b.ts-a.ts);
+const req=id=>(D.requests||{})[me+'_'+id],pay=id=>(D.payments||{})[me+'_'+id];
+const dlLeft=()=>3-(U().dlDay===day()?U().dlCount||0:0);
+function toast(m,ms=2800){const t=$('#t');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',ms)}
+const IC={h:'<path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/>',s:'<circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2.4"/>',d:'<path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16" fill="none" stroke="currentColor" stroke-width="2.4"/>',p:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.6-7 8-7s8 2.5 8 7z"/>'};
+const svg=k=>`<svg viewBox="0 0 24 24">${IC[k]}</svg>`;
+/* ===== ACCESS RULES ===== */
+function access(v){
+ if(allFree())return'play';
+ const p=pay(v.id),t=day();
+ if(p&&p.status==='approved')return'play';
+ if(U().lastFreeDay===t&&U().lastFreeVid===v.id)return'play';
+ if(p&&p.status==='pending')return'payPending';
+ if(U().lastFreeDay===t)return'limit';          // today's 1 free watch is used
+ if(v.price==0)return'play';
+ const r=req(v.id);
+ if(r&&r.status==='approved'&&!r.used)return'play';
+ return r&&r.status!=='approved'?r.status:'locked'; // pending / rejected / locked
+}
+/* ===== LOGIN ===== */
+function login(){$('#app').innerHTML=`<div class=login><div class=wm>${APP.toUpperCase()}</div><p>Enter your mobile number to start watching</p><input id=ph type=tel maxlength=10 placeholder="10-digit mobile number"><button class=w onclick=enter()>Continue</button></div>`}
+async function enter(){const p=$('#ph').value.trim();if(!/^[6-9]\d{9}$/.test(p))return toast('Enter a valid 10-digit number');
+ me=p;localStorage.setItem('af_me',me);if(!U().joined)await upd({joined:Date.now()});shell()}
+function out(){localStorage.removeItem('af_me');me=null;cur=null;login()}
+/* ===== SHELL ===== */
+function shell(){tab='h';$('#app').innerHTML=`<div class=top><span class=logo>${APP[0]}</span><div><span onclick="go('s')">${svg('s')}</span><span class=av onclick="go('p')">${me[0]}</span></div></div><div id=main></div><nav>${[['h','Home'],['s','Search'],['d','Downloads'],['p','Profile']].map(([k,l])=>`<a data-t=${k} onclick="go('${k}')">${svg(k)}${l}</a>`).join('')}</nav>`;render(1)}
+function go(t){tab=t;render(1);scrollTo(0,0)}
+/* ===== VIEWS ===== */
+const img=v=>v.poster?`<img src="${esc(v.poster)}" onerror="this.remove()">`:'';
+const card=v=>`<div class=c onclick="openV('${v.id}')"><div class=p><b class=n>${APP[0]}</b><span class=ti>${esc(v.title)}</span>${img(v)}<i class="tag${v.price>0?'':' f'}">${v.price>0?'₹'+v.price:'FREE'}</i></div></div>`;
+function rows(){const L=vids();if(!L.length)return'<div class=empty>No videos yet.<br>Add videos from the admin app.</div>';
+ const R=[['New on '+APP,L],['Free videos',L.filter(v=>!(v.price>0))]];
+ [...new Set(L.map(v=>v.cat).filter(Boolean))].forEach(c=>R.push([c,L.filter(v=>v.cat==c)]));
+ const h=L[0];
+ return`<div class=hero>${img(h)}<div class=hg><h1>${esc(h.title)}</h1><div class=hb><button class=w onclick="openV('${h.id}')">▶ Play</button><button onclick="openV('${h.id}')">ⓘ Info</button></div></div></div>`
+ +R.filter(r=>r[1].length).map(([t,l])=>`<h3>${esc(t)}</h3><div class=row>${l.slice(0,15).map(card).join('')}</div>`).join('')}
+function find(){const q=($('#q').value||'').toLowerCase();$('#sr').innerHTML=vids().filter(v=>v.title.toLowerCase().includes(q)).map(card).join('')||'<div class=empty>Nothing found</div>'}
+function dls(){const l=Object.values(U().dls||{}).reverse();return`<h3>Downloads</h3><div class=note>Downloads left today: ${dlLeft()}/3</div>`+(l.map(x=>`<div class=li onclick="openV('${x.id}')"><b>${esc(x.title)}</b><small>${new Date(x.ts).toLocaleDateString()}</small></div>`).join('')||'<div class=empty>No downloads yet.</div>')}
+function prof(){return`<h3>Profile</h3><div class=li><b>+91 ${esc(me)}</b><small>Mobile number</small></div><div class=li><b>${allFree()?'The app is FREE right now':'Free watch: '+(U().lastFreeDay===day()?'used today':'available')}</b><small>Downloads left: ${dlLeft()}/3</small></div><div style="padding:14px"><button style="width:100%" onclick=out()>Log out</button></div>`}
+function render(f){const s=JSON.stringify(D)+tab;if(!f&&s==last)return;last=s;
+ document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.t==tab));
+ const m=$('#main');
+ if(tab=='h')m.innerHTML=rows();
+ else if(tab=='s'){if(!$('#q'))m.innerHTML='<input id=q placeholder="Search movies" oninput=find()><div id=sr class=grid></div>';find()}
+ else m.innerHTML=tab=='d'?dls():prof();
+ const a=document.activeElement;if(cur&&!$('#pl')&&!(a&&a.closest&&a.closest('#m')))openV(cur)}
+/* ===== MOVIE SHEET ===== */
+function payPanel(v){const u=(D.settings||{}).upi||UPI,link=`upi://pay?pa=${u}&pn=${encodeURIComponent(APP)}&am=${v.price}&cu=INR&tn=${encodeURIComponent(v.title.slice(0,30))}`;
+ return`<div class=note><b>Pay ₹${v.price} to ${esc(u)}</b><br><a class=ul href="${link}">Open UPI app</a><a class=ul onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(u)}');toast('UPI ID copied')">Copy UPI ID</a><br><br>After paying, enter the transaction / UTR ID below. You get access once the admin verifies it.<input id=utr placeholder="Transaction / UTR ID" style="margin-top:10px"><button class=w style="width:100%;margin-top:8px" onclick=sendPay()>Submit payment</button></div>`}
+const payUI=v=>v.price>0?(payOn?payPanel(v):`<button onclick="payOn=true;openV(cur)">Pay ₹${v.price}</button>`):'';
+function openV(id){cur=id;const v=D.videos&&D.videos[id];if(!v)return closeV();const a=access(v),pr=pay(id);let acts;
+ if(a=='play')acts=`<button class=w onclick=play()>▶ Play</button><button onclick=dl()>⬇ Download (${dlLeft()} left today)</button>`;
+ else if(a=='payPending')acts='<div class=note>Payment submitted. The admin is verifying it. You can watch once it is approved.</div>';
+ else if(a=='limit')acts='<div class=note>Today\'s 1 free watch is already used. Try again tomorrow or pay to watch.</div>'+payUI(v);
+ else if(a=='pending')acts='<div class=note>Free request sent. You can watch once the admin approves it.</div>'+payUI(v);
+ else acts=(pr&&pr.status=='rejected'?'<div class=note>Your last payment was rejected. Check the transaction ID and try again.</div>':'')+(a=='rejected'?'<div class=note>Your free request was declined. Pay to watch.</div>':'<button class=w onclick=ask()>Request free access</button>')+payUI(v);
+ $('#m').innerHTML=`<div class=box><a class=x onclick=closeV()>✕</a><div id=stage>${img(v)}</div><h2>${esc(v.title)}</h2><small style="color:var(--mut)">${v.price>0?'₹'+v.price:'FREE'}${v.cat?' · '+esc(v.cat):''}</small><p style="color:var(--mut);font-size:14px">${esc(v.desc||'')}</p>${acts}</div>`;$('#m').classList.add('on')}
+function closeV(){$('#m').classList.remove('on');$('#m').innerHTML='';cur=null;payOn=false}
+async function ask(){const v=D.videos[cur],id=me+'_'+cur;await put('requests/'+id,{id,phone:me,vid:cur,title:v.title,status:'pending',ts:Date.now()});toast('Request sent to admin');openV(cur)}
+async function sendPay(){const v=D.videos[cur],u=$('#utr').value.trim();if(!/^[A-Za-z0-9]{8,22}$/.test(u))return toast('Enter a valid transaction ID');
+ const id=me+'_'+cur;await put('payments/'+id,{id,phone:me,vid:cur,title:v.title,amount:v.price,utr:u,status:'pending',ts:Date.now()});payOn=false;toast('Payment submitted for verification');openV(cur)}
+async function src(v){lastInfo='';if(!v.local)return v.url;const b=await fx('get',v.id);if(!b||!b.size)return'';lastInfo=(b.size/1048576).toFixed(1)+' MB, '+(b.type||'no type');return URL.createObjectURL(new Blob([b],{type:v.mime||b.type||'video/mp4'}))}
+function watch(e){const st=m=>{let n=$('#vs');if(!n){$('#stage').insertAdjacentHTML('afterend','<div id=vs class=note></div>');n=$('#vs')}n.textContent=m};
+ st('Loading video...');
+ e.onloadedmetadata=()=>st(e.videoWidth?'Ready: '+e.videoWidth+'x'+e.videoHeight+', '+Math.floor(e.duration/60)+':'+String(Math.floor(e.duration%60)).padStart(2,'0')+'. Tap play if it does not start.':'This video has sound but no picture in this browser. The video format (HEVC/H.265?) is not supported. Re-upload it as MP4 (H.264).');
+ e.onplaying=()=>{const n=$('#vs');if(n)n.remove()};
+ setTimeout(()=>{const n=$('#vs');if(n&&n.textContent.startsWith('Loading'))st('Still loading... if the screen stays black, the file format is probably unsupported (HEVC/H.265, MKV). Re-upload it as MP4 (H.264).')},6000)}
+async function sniff(b){try{const rd=async(x,y)=>new TextDecoder('latin1').decode(new Uint8Array(await b.slice(x,y).arrayBuffer())),n=b.size;
+ const t=(await rd(0,Math.min(n,4e6)))+(n>4e6?await rd(Math.max(4e6,n-16e6),n):''),h=k=>t.includes(k);
+ return{v:h('avc1')||h('avc3')?'H.264':h('hvc1')||h('hev1')?'H.265 (HEVC)':h('av01')?'AV1':h('vp09')?'VP9':'unknown',a:h('mp4a')?'AAC':h('ac-3')?'AC-3':h('ec-3')?'E-AC-3':h('dtsc')||h('dtsh')||h('dtse')?'DTS':h('Opus')?'Opus':'unknown'}}catch(x){return null}}
+const why=(r,big)=>!r?(big?'The file is very large for a phone browser.':''):/265/.test(r.v)?'H.265 (HEVC) is not supported by most phone browsers.':/AC-3|DTS/.test(r.a)?'The '+r.a+' audio is not supported by most phone browsers.':big?'The format looks fine, so the file is probably too large for this browser.':'The file may be damaged.';
+async function vErr(e){const n=$('#vs');if(n)n.remove();const c=e.error?e.error.code:0,v=D.videos&&D.videos[cur],head='This video could not be played (error '+c+(lastInfo?', '+lastInfo:'')+').';
+ e.outerHTML='<div class=note id=ve></div>';const ve=$('#ve');
+ if(!(v&&v.local)){ve.textContent=head+' If you used a link, it must be a direct .mp4 link and your internet must be working.';return}
+ ve.textContent=head+' Checking the file format...';
+ const r=await sniff(await fx('get',v.id)),big=parseFloat(lastInfo)>600;
+ ve.textContent=head+(r?' Detected: video '+r.v+', audio '+r.a+'.':'')+' '+why(r,big)+' Delete it in the admin app and re-upload it as MP4 (H.264 + AAC), preferably under 500 MB.'}
+async function play(){const v=D.videos[cur],s=await src(v);if(!s)return toast('Video file is missing or empty. Open both apps from the same folder and browser, or re-upload the video in the admin app.',5000);
+ const p=pay(cur);
+ if(!allFree()&&!(p&&p.status==='approved')){await upd({lastFreeDay:day(),lastFreeVid:cur});const r=req(cur);if(r&&r.status==='approved')await put('requests/'+r.id+'/used',true)}
+ $('#stage').innerHTML=`<video id=pl src="${esc(s)}" controls playsinline preload="auto" onerror="vErr(this)"></video>`;watch($('#pl'));$('#pl').play().catch(()=>0)}
+async function dl(){if(dlLeft()<=0)return toast('You have used all 3 downloads for today');const v=D.videos[cur],s=await src(v);if(!s)return toast('Video file is missing or empty. Open both apps from the same folder and browser, or re-upload the video in the admin app.',5000);
+ const a=document.createElement('a');a.href=s;a.download=v.title+'.mp4';a.target='_blank';a.click();
+ await upd({dlDay:day(),dlCount:4-dlLeft(),dls:[...Object.values(U().dls||{}),{id:cur,title:v.title,ts:Date.now()}].slice(-20)});openV(cur)}
+/* ===== START ===== */
+(async()=>{D=await load();me?shell():login();
+ setInterval(async()=>{D=await load();if(me&&$('#main'))render()},3000)})();
+</script></body></html>
